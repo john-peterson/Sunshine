@@ -35,11 +35,13 @@ namespace platf {
   }
 
   void move_mouse(input_t &input, int deltaX, int deltaY) {
+    BOOST_LOG(warning) << "rel mouse: " << deltaX << ":" << deltaY;
     auto raw = (input_raw_t *) input.get();
     platf::mouse::move(raw, deltaX, deltaY);
   }
 
   void abs_mouse(input_t &input, const touch_port_t &touch_port, float x, float y) {
+    BOOST_LOG(warning) << "abs mouse: " << x << ":" << y;
     auto raw = (input_raw_t *) input.get();
     platf::mouse::move_abs(raw, touch_port, x, y);
   }
