@@ -366,6 +366,7 @@ namespace nvhttp {
     tree.put("root.paired", 1);
     tree.put("root.plaincert", util::hex_vec(conf_intern.servercert, true));
     tree.put("root.<xmlattr>.status_code", 200);
+      BOOST_LOG(info) << "paired";
   }
 
   void clientchallenge(pair_session_t &sess, pt::ptree &tree, const std::string &challenge) {
@@ -583,8 +584,10 @@ namespace nvhttp {
 
           std::cout << "Please insert pin: "sv;
           std::getline(std::cin, pin);
+        BOOST_LOG(debug) << "entered pin:" << pin;
 
           getservercert(ptr->second, tree, pin);
+        BOOST_LOG(debug) << "entered pin:" << pin;
         } else {
 #if defined SUNSHINE_TRAY && SUNSHINE_TRAY >= 1
           system_tray::update_tray_require_pin();
@@ -597,6 +600,7 @@ namespace nvhttp {
       } else if (it->second == "pairchallenge"sv) {
         tree.put("root.paired", 1);
         tree.put("root.<xmlattr>.status_code", 200);
+      BOOST_LOG(error) << "status 200";
         return;
       }
     }
@@ -689,7 +693,7 @@ namespace nvhttp {
     auto local_endpoint = request->local_endpoint();
 
     pt::ptree tree;
-
+      BOOST_LOG(error) << "generating response: " << http::unique_id;
     tree.put("root.<xmlattr>.status_code", 200);
     tree.put("root.hostname", config::nvhttp.sunshine_name);
 
@@ -756,13 +760,15 @@ namespace nvhttp {
     auto current_appid = proc::proc.running();
     tree.put("root.PairStatus", pair_status);
     tree.put("root.currentgame", current_appid);
-    tree.put("root.state", current_appid > 0 ? "SUNSHINE_SERVER_BUSY" : "SUNSHINE_SERVER_FREE");
+    // tree.put("root.state", current_appid > 0 ? "SUNSHINE_SERVER_BUSY" : "SUNSHINE_SERVER_FREE");
+    tree.put("root.state",  "SUNSHINE_SERVER_FREE");
 
     std::ostringstream data;
 
     pt::write_xml(data, tree);
     response->write(data.str());
     response->close_connection_after_response = true;
+      BOOST_LOG(error) << "response written: " << current_appid;
   }
 
   nlohmann::json get_all_clients() {
@@ -884,6 +890,7 @@ namespace nvhttp {
       return;
     }
 
+    // appid=0;
     if (appid > 0) {
       auto err = proc::proc.execute(appid, launch_session);
       if (err) {
